@@ -20,14 +20,15 @@ from .schemas import GenerateRequest
 
 
 COMFYUI_URL = "http://localhost:8188"
+PROGRESS_NODE_ID = "6"  # WanVideoSampler node in build_wan22_workflow
 
 # Calibrated 2026-10-18 on 2x RTX 5060 Ti: 17 frames x 25 steps at 704x1280 took
 # 280 s end-to-end. The CPU T5 encode is inside the fixed overhead term.
-ESTIMATE_BASE_SECONDS = 40.0
+ESTIMATE_BASE_SECONDS = 20.0
 # Starting point measured 2026-10-18: 347 s for 17f x 10 steps at 704x1280.
 # The estimate self-calibrates from every completed job, because the CPU T5
 # encode dominates and varies with cold/warm model state.
-DEFAULT_SECONDS_PER_UNIT = 2.0e-6
+DEFAULT_SECONDS_PER_UNIT = 2.5e-7
 CALIBRATION_PATH = Path.home() / ".local" / "share" / "wan2.2" / "calibration.json"
 
 
@@ -203,7 +204,8 @@ def build_wan22_workflow(prompt: str, negative_prompt: str = "", width: int = 70
                 "t5": ["3", 0],
                 "force_offload": True,
                 "model_to_offload": ["1", 0],
-                "device": "cpu"
+                "use_disk_cache": True,
+                "device": "gpu"
             }
         },
         "5": {
@@ -314,14 +316,18 @@ class GpuWorker:
     def _pump_progress(self, ws, prompt_id: str, job: Job, elapsed: float, estimated: float):
         """Drain buffered websocket messages and update job.progress in place."""
         if ws is not None:
-            for _ in range(50):
+            for _ in range(5):
                 try:
                     message = json.loads(ws.recv())
                 except Exception:
                     break
                 if message.get("type") == "progress":
                     data = message.get("data", {})
-                    if data.get("prompt_id") in (None, prompt_id) and data.get("max"):
+                    if (
+                        data.get("node") == PROGRESS_NODE_ID
+                        and data.get("prompt_id") in (None, prompt_id)
+                        and data.get("max")
+                    ):
                         value = float(data["value"]) / float(data["max"]) * 0.95
                         job.progress = max(job.progress, min(0.95, value))
         if job.progress < 0.02:
