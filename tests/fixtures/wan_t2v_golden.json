@@ -1,0 +1,116 @@
+{
+  "1": {
+    "class_type": "WanVideoModelLoader",
+    "inputs": {
+      "base_precision": "fp16",
+      "load_device": "offload_device",
+      "model": "Wan2.2-TI2V-5B-Q8_0.gguf",
+      "quantization": "disabled"
+    }
+  },
+  "2": {
+    "class_type": "WanVideoVAELoader",
+    "inputs": {
+      "model_name": "Wan2.2_VAE.safetensors",
+      "precision": "fp16"
+    }
+  },
+  "3": {
+    "class_type": "LoadWanVideoT5TextEncoder",
+    "inputs": {
+      "load_device": "offload_device",
+      "model_name": "models_t5_umt5-xxl-enc-bf16.pth",
+      "precision": "bf16"
+    }
+  },
+  "4": {
+    "class_type": "WanVideoTextEncode",
+    "inputs": {
+      "device": "gpu",
+      "force_offload": true,
+      "model_to_offload": [
+        "1",
+        0
+      ],
+      "negative_prompt": "blurry, low quality, distorted",
+      "positive_prompt": "golden probe",
+      "t5": [
+        "3",
+        0
+      ],
+      "use_disk_cache": true
+    }
+  },
+  "5": {
+    "class_type": "WanVideoEmptyEmbeds",
+    "inputs": {
+      "height": 1280,
+      "num_frames": 17,
+      "width": 704
+    }
+  },
+  "6": {
+    "class_type": "WanVideoSampler",
+    "inputs": {
+      "cfg": 5.0,
+      "force_offload": true,
+      "image_embeds": [
+        "5",
+        0
+      ],
+      "model": [
+        "1",
+        0
+      ],
+      "riflex_freq_index": 0,
+      "scheduler": "unipc",
+      "seed": 42,
+      "shift": 5.0,
+      "steps": 10,
+      "text_embeds": [
+        "4",
+        0
+      ]
+    }
+  },
+  "7": {
+    "class_type": "WanVideoDecode",
+    "inputs": {
+      "enable_vae_tiling": true,
+      "samples": [
+        "6",
+        0
+      ],
+      "tile_stride_x": 144,
+      "tile_stride_y": 128,
+      "tile_x": 272,
+      "tile_y": 272,
+      "vae": [
+        "2",
+        0
+      ]
+    }
+  },
+  "8": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "fps": 24.0,
+      "images": [
+        "7",
+        0
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "codec": "h264",
+      "filename_prefix": "wan22_output",
+      "format": "mp4",
+      "video": [
+        "8",
+        0
+      ]
+    }
+  }
+}

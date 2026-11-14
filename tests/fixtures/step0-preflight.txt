@@ -1,0 +1,8 @@
+fastapi 0.143.3 <- /home/jarvis/.venv/wan2.2/lib/python3.12/site-packages/fastapi/__init__.py
+pydantic 2.14.1 <- /home/jarvis/.venv/wan2.2/lib/python3.12/site-packages/pydantic/__init__.py
+httpx 0.28.1 <- /home/jarvis/.venv/wan2.2/lib/python3.12/site-packages/httpx/__init__.py
+starlette 1.8.0 <- /home/jarvis/.venv/wan2.2/lib/python3.12/site-packages/starlette/__init__.py
+wan_service.config <- /home/jarvis/Wan2.2-hg2/wan_service/config.py
+pytest 9.2.0 <- /home/jarvis/.venv/wan2.2-hg2-tests/lib/python3.12/site-packages/pytest/__init__.py
+interpreter: 3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]
+PREFLIGHT OK
