@@ -67,10 +67,12 @@ elapsed=$(( $(date +%s) - start ))
 ts=$(date +%Y%m%dT%H%M%S)
 dir="$RECEIPTS/$ts"
 mkdir -p "$dir"
-python3 - "$elapsed" "$dir/receipt.txt" <<PY
+python3 - "$elapsed" "$dir/receipt.txt" "$req" "$job_id" "$est" "$FRAMES" "$STEPS" "$WIDTH" "$HEIGHT" <<'PY'
 import math, sys
-elapsed = int(sys.argv[1])
-units_meas = $FRAMES * $STEPS * $WIDTH * $HEIGHT
+elapsed = int(sys.argv[1]); path = sys.argv[2]; req = sys.argv[3]
+job_id = sys.argv[4]; est = sys.argv[5]
+frames, steps, width, height = (int(x) for x in sys.argv[6:10])
+units_meas = frames * steps * width * height
 units_hg2 = 97 * 50 * 1280 * 736   # engine S4L params at the GENERATED shape
 base = 20.0                        # wrapper ESTIMATE_BASE_SECONDS
 r = max(elapsed - base, 1.0) / units_meas
@@ -78,10 +80,10 @@ hg2 = base + units_hg2 * r
 proposed = int(math.ceil(2 * hg2 / 300.0) * 300)
 lines = [
     "WAN timeout measurement receipt (plan v1.3 Step 8, C7)",
-    "request: $req",
-    "job_id: $job_id",
-    "wrapper_estimate_seconds: $est",
-    "measured_elapsed_seconds: $elapsed (wall clock, 10 s poll granularity — conservative)",
+    "request: " + req,
+    "job_id: " + job_id,
+    "wrapper_estimate_seconds: " + est,
+    "measured_elapsed_seconds: %d (wall clock, 10 s poll granularity — conservative)" % elapsed,
     "measured_units: %d" % units_meas,
     "derived_seconds_per_unit: %.6e" % r,
     "hg2_units: %d (97f x 50 steps @ 1280x736 generated)" % units_hg2,
@@ -89,7 +91,7 @@ lines = [
     "PROPOSED_WAN_JOB_TIMEOUT_SECONDS: %d (>= 2x extrapolated, 300 s boundary)" % proposed,
 ]
 text = "\n".join(lines) + "\n"
-open(sys.argv[2], "w").write(text)
+open(path, "w").write(text)
 print(text)
 PY
 echo "receipt: $dir/receipt.txt"
