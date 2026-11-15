@@ -1,32 +1,27 @@
-"""Lifecycle regressions (plan v1.3 §5, C3/C9): terminal states stay terminal;
-cancellation is prompt-targeted; draining ownership until the owned prompt is
-absent/terminal and the generation thread quiesced. Zero global interrupts in
-EVERY case."""
+"""Lifecycle regressions (plan v1.3 §5, C3/C9), BOTH wrappers: terminal states
+stay terminal; cancellation is prompt-targeted; draining ownership until the
+owned prompt is absent/terminal and the generation thread quiesced. Zero global
+interrupts in EVERY case."""
 import time
 from types import SimpleNamespace
 
 import pytest
 
-from ltx_service.worker import LtxWorker, decide_cancel_action
-from fake_comfy import FakeComfy, make_mp4
+from ltx_service.worker import decide_cancel_action as ltx_policy
+from wan_service.worker import decide_cancel_action as wan_policy
+from fake_comfy import make_rig
 
 
 def req(**over):
-    d = dict(prompt="p", negative_prompt="n", width=1280, height=720, num_frames=33, fps=24, seed=1)
+    d = dict(prompt="p", negative_prompt="n", width=1280, height=720, num_frames=33, fps=24, seed=1,
+             num_inference_steps=10, guidance_scale=5.0)
     d.update(over)
     return SimpleNamespace(**d)
 
 
-@pytest.fixture()
-def rig(tmp_path):
-    indir = tmp_path / "input"
-    indir.mkdir()
-    outdir = tmp_path / "out"
-    outdir.mkdir()
-    fake = FakeComfy()
-    fake.view_data = make_mp4(tmp_path / "fx.mp4", 1280, 768)
-    w = LtxWorker(fake, input_dir=indir, output_dir=outdir, job_timeout=0.08, poll_interval=0.01, drain_interval=0.01)
-    return SimpleNamespace(w=w, fake=fake, indir=indir, outdir=outdir)
+@pytest.fixture(params=["ltx", "wan"])
+def rig(request, tmp_path):
+    return make_rig(request.param, tmp_path)
 
 
 def start(rig, staged="gen-j1-van.png", **over):
@@ -182,10 +177,11 @@ def test_cancel_while_queued_never_submits(rig):
     assert list(rig.indir.iterdir()) == []
 
 
-def test_decide_cancel_action_pure():
+@pytest.mark.parametrize("policy", [ltx_policy, wan_policy], ids=["ltx", "wan"])
+def test_decide_cancel_action_pure(policy):
     q = {"queue_running": [[0, "own"], [1, "other"]], "queue_pending": [[0, "p"]]}
-    assert decide_cancel_action(q, "own") == ("interrupt", "own")
-    assert decide_cancel_action(q, "p") == ("delete", "p")
-    assert decide_cancel_action(q, "absent") == ("none", None)
-    assert decide_cancel_action(q, None) == ("none", None)
-    assert decide_cancel_action({}, "own") == ("none", None)
+    assert policy(q, "own") == ("interrupt", "own")
+    assert policy(q, "p") == ("delete", "p")
+    assert policy(q, "absent") == ("none", None)
+    assert policy(q, None) == ("none", None)
+    assert policy({}, "own") == ("none", None)

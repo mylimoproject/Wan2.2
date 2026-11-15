@@ -33,6 +33,7 @@ _TMP = Path(tempfile.mkdtemp(prefix="hg2-tests-"))
 os.environ["HOME"] = str(_TMP / "home")
 os.environ["WAN_OUTPUT_DIR"] = str(_TMP / "wan-out")
 os.environ["LTX_OUTPUT_DIR"] = str(_TMP / "ltx-out")
+os.environ["WAN_PROGRESS_WS"] = "0"  # hermetic: no websocket to the live ComfyUI
 
 import pytest  # noqa: E402
 
