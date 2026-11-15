@@ -1,0 +1,20 @@
+{
+  "schema": "local-services/1",
+  "_note": "Local generation services for the local-test command (plan v1.3.10, S4L). Jose maintains these origins; agents never edit them. Hosts must be loopback, RFC 1918, or 100.64.0.0/10. providerName equals the providerTag key. stillsRoot is a folder on the SERVICE host where Jose stages the reference stills; the engine sends the service-relative path plus sha256 and the wrapper refuses a missing or mismatched still.",
+  "services": {
+    "local-wan": {
+      "baseUrl": "http://100.105.156.94:8765",
+      "model": "wan2.2-14b-fp8",
+      "providerName": "local-wan",
+      "kind": "video",
+      "stillsRoot": "/home/jarvis/wan-stills"
+    },
+    "local-ltx": {
+      "baseUrl": "http://100.105.156.94:8766",
+      "model": "ltx-2.5",
+      "providerName": "local-ltx",
+      "kind": "video",
+      "stillsRoot": "/home/jarvis/ltx-stills"
+    }
+  }
+}

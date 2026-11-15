@@ -1,0 +1,33 @@
+{
+  "schema": "local-clips/1",
+  "_note": "The fixed local-test clip set (plan v1.3.10, S4L; OR-8). Image-to-video from supplied stills, one prompt per model (D-OR7-02: LTX's prompting guide differs from WAN's; never paste one model's prompt into the other). The still is staged by Jose on the service host under stillsRoot; before the first live run Jose replaces still.sha256 with the staged file's real SHA-256 (the engine refuses the all-zero placeholder with local_clip_still_unset). Offline tests use their own fixtures.",
+  "clips": [
+    {
+      "id": "clip-1",
+      "unit": "clip-1",
+      "still": {
+        "servicePath": "locksmith-van-front.png",
+        "sha256": "2b073987f085fa35621272f7af0ab2bf4894281321dfcd8c53d7ae830694fb44"
+      },
+      "params": {
+        "width": 1280,
+        "height": 720,
+        "numFrames": 97,
+        "fps": 24,
+        "steps": 50,
+        "guidanceScale": 5.0,
+        "seed": 1
+      },
+      "prompts": {
+        "local-wan": {
+          "prompt": "A locksmith's service van parked on a sunny South Florida street, the camera slowly pushes in toward the van's side door, gentle handheld motion, realistic lighting, no text.",
+          "negativePrompt": "text, watermark, logo, distortion, blur, low quality"
+        },
+        "local-ltx": {
+          "prompt": "Slow cinematic push-in on a parked locksmith service van, bright daylight, palm trees in the background, subtle camera drift, photorealistic, clean frame without lettering.",
+          "negativePrompt": "words, letters, watermark, warped body, flicker"
+        }
+      }
+    }
+  ]
+}
