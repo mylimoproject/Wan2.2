@@ -36,4 +36,12 @@
 - Suite: 150 collected, 147 passed, 3 skipped (route-exclusive: LTX skips WAN's two T2V tests; WAN skips the I2V-only missing-still refusal). Both-wrapper R3-1 preflight green (imports + shared-venv origins, interpreter 3.12.3).
 - Live tree and services untouched; wan-stills/locksmith-van-front.png already staged. Smoke scripts belong to Steps 7/8 and were not written here.
 
-## Cumulative: 147 passed + 3 route-exclusive skips (Steps 1–5). Step 6's checks (both-wrapper preflight + full suite + recorded counts) ran green in the same session. Next: Step 7 — Jose-gated (J2 GPU1 check, ltx.service install with sudo, LTX live smoke).
+## Step 7 — install files + ltx.service installed (2026-11-14, Jose-authorized via SSH)
+- **PORT RULING (Jose, 2026-11-14):** the plan's 8766 is held by command-post's API (127.0.0.1:8766, up since boot). LTX moves to **8767** — a config-only deviation (unit LTX_PORT + Jose's local-services.json baseUrl); engine contract semantics unchanged; command-post untouched.
+- Files: `systemd/ltx.service` (User=jarvis, worktree WorkingDirectory/PYTHONPATH, shared-runtime uvicorn, 0.0.0.0:8767, Restart=on-failure; [Install] present but NOT enabled), `scripts/install-ltx-service.sh` (sudo copy + daemon-reload + start only; refuses a busy 8767; prints network policy), `scripts/ltx-smoke.sh` (Jose runs: 33 frames, final 1280×720, seed 42, fixed 8+3; /health gate → 202 → poll → ffprobe h264+audio exact dims → sha256 receipt under ~/ltx-smoke-receipts/<ts>/; DRY_RUN=1 offline mode).
+- Offline checks: bash -n both scripts; systemd-analyze verify clean; DRY_RUN request shape + still sha 2b073987… verified against the J1-approved staged still.
+- INSTALL receipt: ltx.service **active**, /health {"status":"ok","model":"ltx-2.5-q3","queue_depth":1}; listener 0.0.0.0:8767; ufw default deny incoming with ALLOW only on tailscale0 (+ LAN 22/tcp) → tailnet-only reachability verified, including a health GET from jarvis-sister over the tailnet (the engine's exact origin). wan2.2.service + comfyui.service untouched and active; WAN :8765 still answering. ltx.service **NOT enabled** (enable only after the smoke passes).
+- Pre-existing host noise: /etc/sudoers.d/openclaw-oom emits a wildcard sudoers warning on every sudo call (unrelated to this build).
+- PENDING (Jose): J3 in Locksmith `scripts/ads/creative/local-services.json` — local-wan model `5b-gguf`; local-ltx model `ltx-2.5-q3` AND baseUrl `http://100.105.156.94:8767` — then the live smoke.
+
+## Cumulative: 147 passed + 3 route-exclusive skips (Steps 1–5). Step 6's checks (both-wrapper preflight + full suite + recorded counts) ran green in the same session. Step 7 install done; next is Jose's J3 tags + LTX live smoke, then Step 8.

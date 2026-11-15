@@ -1,0 +1,17 @@
+[Unit]
+Description=LTX-2.5 Local Video Wrapper (HG-2 test stage, worktree build)
+After=network.target
+
+[Service]
+Type=simple
+User=jarvis
+WorkingDirectory=/home/jarvis/Wan2.2-hg2
+Environment=PYTHONPATH=/home/jarvis/Wan2.2-hg2
+Environment=LTX_PORT=8767
+Environment=LTX_OUTPUT_DIR=/home/jarvis/.local/share/ltx2.5/outputs
+ExecStart=/home/jarvis/.venv/wan2.2/bin/python3 -m uvicorn ltx_service.main:app --host 0.0.0.0 --port 8767 --workers 1
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
