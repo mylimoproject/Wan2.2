@@ -16,6 +16,6 @@ Last updated: 2026-11-14 (HG-2 wrapper build: Step 5 WAN upgrade built on the pe
 
 **J2 CLOSED 2026-11-14:** GPU1 fixed by Jose; read-only verification clean at 22:42 (both GPUs enumerated, GPU1 idle 32°C / 16 MiB, no pending repairs/blacklist, no NVIDIA Xid since the 20:57 driver load). Build stays single-GPU on GPU0 by policy.
 **J3 CLOSED 2026-11-14:** Jose's edit verified byte-exact against both wrappers' /health over the tailnet — local-wan `5b-gguf` @ :8765, local-ltx `ltx-2.5-q3` @ :8767 (a trailing space in the first save was caught and fixed by Jose).
-**JOSE:** J4/Step 8 — approve the measured WAN timeout value and confirm the `wan2.2.service` restart.
+**JOSE:** J4/Step 8 — measured 2026-11-15: 216.6 s for 33f×20 steps @1280×736 → HG-2 ≈1465 s; **proposed `WAN_JOB_TIMEOUT_SECONDS=3000`** (≥2×, receipt in ROG `~/wan-timeout-receipts/20261115T044742/`). Approve the value and confirm the `wan2.2.service` restart; deploy order: drop-ins → daemon-reload → ff-only main → restart → verify env → WAN I2V smoke.
 **JOSE:** the live LTX/WAN smokes and the HG-2 `--execute` takes are yours to run (exact commands in plan Steps 7–9).
 **JOSE:** decide whether the sister docs commits, the peer's two progress/ETA commits, and the `hg2-wrappers` build commit should be published; nothing has been pushed.
